@@ -11,6 +11,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { colors, fontSize, radii } from '../theme';
 import Button from '../components/Button';
+import { readJSON, writeJSON, STORAGE_KEYS } from '../storage/localStorage';
+import type { User } from '../data/types';
 
 interface Props {
   onBack: () => void;
@@ -80,6 +82,11 @@ export default function LoginScreen({ onBack, onSuccess, onRegister }: Props) {
     try {
       const result = await loginUser(formData);
       if (result.success) {
+        const stored = readJSON<User | null>(STORAGE_KEYS.user, null);
+        writeJSON(STORAGE_KEYS.user, {
+          name: stored?.name ?? '',
+          email: formData.email.trim(),
+        });
         onSuccess();
       } else {
         setErrors({ email: result.error || 'Credenciais inválidas' });

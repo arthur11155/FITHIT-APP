@@ -53,9 +53,11 @@ export const STORAGE_KEYS = {
   glucoseReadings: '@fithit/glucose/readings',
   hospitals: '@fithit/hospitals',
   upcomingExams: '@fithit/exams/upcoming',
+  examResults: '@fithit/exams/results',
   examInfo: '@fithit/exams/info',
   meals: '@fithit/nutrition/meals',
   nutritionTips: '@fithit/nutrition/tips',
   foodsToAvoid: '@fithit/nutrition/foods-to-avoid',
   recommendedFoods: '@fithit/nutrition/recommended-foods',
+  user: '@fithit/user',
 } as const;

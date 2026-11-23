@@ -1,70 +1,16 @@
-export type GlucoseStatus = 'normal' | 'high' | 'low';
+import type {
+  ExamInfo,
+  ExamResult,
+  GlucoseReading,
+  Hospital,
+  Meal,
+  NutritionTip,
+  UpcomingExam,
+} from './types';
 
-export interface GlucoseReading {
-  id: number;
-  value: number;
-  date: string;
-  time: string;
-  period: string;
-  status: GlucoseStatus;
-}
+export const defaultReadings: GlucoseReading[] = [];
 
-export interface Hospital {
-  id: number;
-  name: string;
-  specialty: string;
-  distance: string;
-  address: string;
-  phone: string;
-  open: boolean;
-  rating: number;
-  emergencyAvailable: boolean;
-}
-
-export interface UpcomingExam {
-  id: number;
-  name: string;
-  date: string;
-  time: string;
-  location: string;
-  preparacao: string;
-}
-
-export interface ExamResult {
-  id: number;
-  name: string;
-  date: string;
-  result: string;
-  reference: string;
-}
-
-export interface ExamInfo {
-  name: string;
-  frequency: string;
-  description: string;
-  importance: string;
-}
-
-export type MealIcon = 'cafe' | 'apple' | 'sunny' | 'restaurant' | 'moon';
-
-export interface MealItem {
-  name: string;
-  carbs: number;
-  calories: number;
-}
-
-export interface Meal {
-  id: number;
-  meal: string;
-  time: string;
-  icon: MealIcon;
-  completed: boolean;
-  items: MealItem[];
-}
-
-export const seedReadings: GlucoseReading[] = [];
-
-export const seedHospitals: Hospital[] = [
+export const defaultHospitals: Hospital[] = [
   {
     id: 1,
     name: 'Hospital Universitário Oswaldo Cruz',
@@ -111,9 +57,9 @@ export const seedHospitals: Hospital[] = [
   },
 ];
 
-export const seedUpcomingExams: UpcomingExam[] = [];
+export const defaultUpcomingExams: UpcomingExam[] = [];
 
-export const examResults: ExamResult[] = [
+export const defaultExamResults: ExamResult[] = [
   {
     id: 1,
     name: 'Hemoglobina Glicada (HbA1c)',
@@ -137,7 +83,7 @@ export const examResults: ExamResult[] = [
   },
 ];
 
-export const seedExamInfo: ExamInfo[] = [
+export const defaultExamInfo: ExamInfo[] = [
   {
     name: 'Hemoglobina Glicada (HbA1c)',
     frequency: 'A cada 3 meses',
@@ -164,7 +110,7 @@ export const seedExamInfo: ExamInfo[] = [
   },
 ];
 
-export const seedMeals: Meal[] = [
+export const defaultMeals: Meal[] = [
   {
     id: 1,
     meal: 'Café da Manhã',
@@ -229,25 +175,25 @@ export const seedMeals: Meal[] = [
   },
 ];
 
-export const seedNutritionTips = [
+export const defaultNutritionTips: NutritionTip[] = [
   {
     title: 'Controle de Carboidratos',
     description: 'Prefira carboidratos complexos como arroz integral, aveia e batata doce.',
-    icon: 'leaf' as const,
+    icon: 'leaf',
   },
   {
     title: 'Horários Regulares',
     description: 'Faça refeições a cada 3 horas para manter a glicemia estável.',
-    icon: 'cafe' as const,
+    icon: 'cafe',
   },
   {
     title: 'Fibras',
     description: 'Consuma alimentos ricos em fibras para controlar a absorção de açúcar.',
-    icon: 'apple' as const,
+    icon: 'apple',
   },
 ];
 
-export const seedFoodsToAvoid = [
+export const defaultFoodsToAvoid = [
   'Refrigerantes e sucos industrializados',
   'Doces e sobremesas açucaradas',
   'Pão branco e massas refinadas',
@@ -255,7 +201,7 @@ export const seedFoodsToAvoid = [
   'Frutas em calda ou cristalizadas',
 ];
 
-export const seedRecommendedFoods = [
+export const defaultRecommendedFoods = [
   'Vegetais verde-escuros (brócolis, espinafre)',
   'Proteínas magras (frango, peixe, ovos)',
   'Grãos integrais (aveia, quinoa, arroz integral)',

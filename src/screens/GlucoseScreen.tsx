@@ -17,8 +17,8 @@ import Button from '../components/Button';
 import ScreenHeader from '../components/ScreenHeader';
 import GlucoseChart, { GlucoseChartPoint } from '../components/GlucoseChart';
 import { colors, fontSize, radii } from '../theme';
-import { seedReadings } from '../data/seedData';
-import type { GlucoseReading, GlucoseStatus } from '../data/seedData';
+import { defaultReadings } from '../data/defaults';
+import type { GlucoseReading, GlucoseStatus } from '../data/types';
 import { useStoredState } from '../hooks/useStoredState';
 import { STORAGE_KEYS } from '../storage/localStorage';
 
@@ -55,7 +55,7 @@ function formatPtBr(date: string) {
 export default function GlucoseScreen() {
   const [readings, setReadings] = useStoredState<GlucoseReading[]>(
     STORAGE_KEYS.glucoseReadings,
-    seedReadings
+    defaultReadings
   );
   const [modalOpen, setModalOpen] = useState(false);
   const [value, setValue] = useState('');
@@ -63,8 +63,6 @@ export default function GlucoseScreen() {
   const [notes, setNotes] = useState('');
 
   const chartData: GlucoseChartPoint[] = readings
-    .slice()
-    .reverse()
     .slice(0, 7)
     .reverse()
     .map((reading) => ({ date: formatDayMonth(reading.date), value: reading.value }));
@@ -79,6 +77,15 @@ export default function GlucoseScreen() {
     ? Math.round((inRangeCount / lastSeven.length) * 100)
     : 0;
   const latest = readings[0];
+  const previous = readings[1];
+  const trend =
+    !latest || !previous
+      ? '—'
+      : latest.value - previous.value > 10
+        ? 'Subindo'
+        : latest.value - previous.value < -10
+          ? 'Descendo'
+          : 'Estável';
 
   const saveReading = () => {
     const numeric = parseInt(value, 10);
@@ -129,7 +136,7 @@ export default function GlucoseScreen() {
             <Ionicons name="trending-up" size={14} color={colors.blue600} />
             <Text style={styles.statLabel}>Tendência</Text>
           </View>
-          <Text style={[styles.statValue, { color: colors.blue700 }]}>Estável</Text>
+          <Text style={[styles.statValue, { color: colors.blue700 }]}>{trend}</Text>
         </Card>
         <Card style={styles.gridItem}>
           <View style={styles.statHeader}>

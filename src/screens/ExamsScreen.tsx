@@ -18,8 +18,12 @@ import Badge from '../components/Badge';
 import SegmentedTabs from '../components/SegmentedTabs';
 import ScreenHeader from '../components/ScreenHeader';
 import { colors, fontSize, radii } from '../theme';
-import { seedUpcomingExams, seedExamInfo, examResults } from '../data/seedData';
-import type { UpcomingExam } from '../data/seedData';
+import {
+  defaultUpcomingExams,
+  defaultExamInfo,
+  defaultExamResults,
+} from '../data/defaults';
+import type { ExamResult, UpcomingExam } from '../data/types';
 import { useStoredState } from '../hooks/useStoredState';
 import { STORAGE_KEYS } from '../storage/localStorage';
 
@@ -45,9 +49,13 @@ export default function ExamsScreen() {
   const [tab, setTab] = useState<Tab>('upcoming');
   const [upcomingExams, setUpcomingExams] = useStoredState<UpcomingExam[]>(
     STORAGE_KEYS.upcomingExams,
-    seedUpcomingExams
+    defaultUpcomingExams
   );
-  const [examInfo] = useStoredState(STORAGE_KEYS.examInfo, seedExamInfo);
+  const [examResults] = useStoredState<ExamResult[]>(
+    STORAGE_KEYS.examResults,
+    defaultExamResults
+  );
+  const [examInfo] = useStoredState(STORAGE_KEYS.examInfo, defaultExamInfo);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);

@@ -9,18 +9,19 @@ import SegmentedTabs from '../components/SegmentedTabs';
 import ScreenHeader from '../components/ScreenHeader';
 import { colors, fontSize, radii } from '../theme';
 import {
-  seedMeals,
-  seedNutritionTips,
-  seedFoodsToAvoid,
-  seedRecommendedFoods,
-} from '../data/seedData';
-import type { Meal, MealIcon } from '../data/seedData';
+  defaultMeals,
+  defaultNutritionTips,
+  defaultFoodsToAvoid,
+  defaultRecommendedFoods,
+} from '../data/defaults';
+import type { Meal, MealIcon, NutritionTip } from '../data/types';
 import { useStoredState } from '../hooks/useStoredState';
 import { STORAGE_KEYS } from '../storage/localStorage';
 
 type Tab = 'meals' | 'tips' | 'foods';
 
 const mealIcons: Record<MealIcon, keyof typeof Ionicons.glyphMap> = {
+  leaf: 'leaf',
   cafe: 'cafe',
   apple: 'nutrition',
   sunny: 'sunny',
@@ -33,10 +34,16 @@ const dailyCaloriesGoal = 1800;
 
 export default function NutritionScreen() {
   const [tab, setTab] = useState<Tab>('meals');
-  const [meals] = useStoredState<Meal[]>(STORAGE_KEYS.meals, seedMeals);
-  const [nutritionTips] = useStoredState(STORAGE_KEYS.nutritionTips, seedNutritionTips);
-  const [foodsToAvoid] = useStoredState(STORAGE_KEYS.foodsToAvoid, seedFoodsToAvoid);
-  const [recommendedFoods] = useStoredState(STORAGE_KEYS.recommendedFoods, seedRecommendedFoods);
+  const [meals] = useStoredState<Meal[]>(STORAGE_KEYS.meals, defaultMeals);
+  const [nutritionTips] = useStoredState<NutritionTip[]>(
+    STORAGE_KEYS.nutritionTips,
+    defaultNutritionTips
+  );
+  const [foodsToAvoid] = useStoredState(STORAGE_KEYS.foodsToAvoid, defaultFoodsToAvoid);
+  const [recommendedFoods] = useStoredState(
+    STORAGE_KEYS.recommendedFoods,
+    defaultRecommendedFoods
+  );
 
   const completedMeals = meals.filter((meal) => meal.completed);
   const totalCarbsConsumed = completedMeals.reduce(
@@ -129,7 +136,7 @@ export default function NutritionScreen() {
 
         {tab === 'tips' ? (
           nutritionTips.map((tip, index) => {
-            const icon = tip.icon as MealIcon;
+            const icon = tip.icon;
             return (
               <Card key={index} style={styles.tipCard}>
                 <View style={styles.tipRow}>

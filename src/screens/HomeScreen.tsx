@@ -5,17 +5,10 @@ import { useNavigation } from '@react-navigation/native';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { colors, fontSize, radii } from '../theme';
-
-interface QuickStat {
-  label: string;
-  value: string;
-  color: string;
-}
-
-interface AlertItem {
-  message: string;
-  time: string;
-}
+import { defaultReadings, defaultUpcomingExams } from '../data/defaults';
+import type { GlucoseReading, UpcomingExam, User } from '../data/types';
+import { useStoredState } from '../hooks/useStoredState';
+import { STORAGE_KEYS } from '../storage/localStorage';
 
 interface QuickAction {
   title: string;
@@ -24,18 +17,6 @@ interface QuickAction {
   path: 'Home' | 'Hospitals' | 'Exams' | 'Nutrition' | 'Glucose';
   label: string;
 }
-
-const quickStats: QuickStat[] = [
-  { label: 'Glicose Atual', value: '126 mg/dL', color: colors.green600 },
-  { label: 'Última Medição', value: 'Hoje, 08:30', color: colors.gray500 },
-  { label: 'Meta Mensal', value: '85%', color: colors.green600 },
-  { label: 'Consultas', value: '3 agend.', color: colors.blue600 },
-];
-
-const alerts: AlertItem[] = [
-  { message: 'Hora de medir sua glicose', time: 'Agora' },
-  { message: 'Consulta amanhã às 14h', time: '1 dia' },
-];
 
 const quickActions: QuickAction[] = [
   { title: 'Registrar Glicose', description: 'Nova medição', icon: 'pulse', path: 'Glucose', label: 'Medir Agora' },
@@ -48,13 +29,79 @@ type Navigation = {
   navigate: (screen: QuickAction['path']) => void;
 };
 
+function todayKey() {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+function formatDatePtBr(date: string) {
+  const [year, month, day] = date.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 export default function HomeScreen() {
   const navigation = useNavigation<Navigation>();
+  const [user] = useStoredState<User | null>(STORAGE_KEYS.user, null);
+  const [readings] = useStoredState<GlucoseReading[]>(
+    STORAGE_KEYS.glucoseReadings,
+    defaultReadings
+  );
+  const [upcomingExams] = useStoredState<UpcomingExam[]>(
+    STORAGE_KEYS.upcomingExams,
+    defaultUpcomingExams
+  );
+
+  const latest = readings[0];
+  const lastSeven = readings.slice(0, 7);
+  const inRangePct =
+    lastSeven.length > 0
+      ? Math.round(
+          (lastSeven.filter((r) => r.status === 'normal').length / lastSeven.length) * 100
+        )
+      : 0;
+
+  const firstName = user?.name.trim().split(/\s+/)[0];
+
+  const alerts: { message: string; time: string }[] = [];
+  if (latest?.date !== todayKey()) {
+    alerts.push({ message: 'Hora de medir sua glicose', time: 'Hoje' });
+  }
+  const nextExam = upcomingExams
+    .slice()
+    .sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`))[0];
+  if (nextExam) {
+    alerts.push({
+      message: `Consulta: ${nextExam.name}`,
+      time: formatDatePtBr(nextExam.date),
+    });
+  }
+
+  const quickStats = [
+    {
+      label: 'Glicose Atual',
+      value: latest ? `${latest.value} mg/dL` : '—',
+      color: colors.green600,
+    },
+    {
+      label: 'Última Medição',
+      value: latest ? `${formatDatePtBr(latest.date)} ${latest.time}` : 'Nenhuma',
+      color: colors.gray500,
+    },
+    { label: 'No Alvo (7 dias)', value: `${inRangePct}%`, color: colors.green600 },
+    {
+      label: 'Consultas',
+      value: `${upcomingExams.length} agend.`,
+      color: colors.blue600,
+    },
+  ];
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.greeting}>
-        <Text style={styles.greetingText}>Olá, Maria! 👋</Text>
+        <Text style={styles.greetingText}>
+          {firstName ? `Olá, ${firstName}!` : 'Olá!'} 👋
+        </Text>
         <Text style={styles.greetingSub}>Como está se sentindo hoje?</Text>
       </View>
 
@@ -72,15 +119,19 @@ export default function HomeScreen() {
           <Ionicons name="alert-circle" size={16} color={colors.green800} />
           <Text style={styles.alertsTitle}>Lembretes</Text>
         </View>
-        {alerts.map((alert, index) => (
-          <View
-            key={index}
-            style={[styles.alertRow, index < alerts.length - 1 && styles.alertRowBorder]}
-          >
-            <Text style={styles.alertMessage}>{alert.message}</Text>
-            <Text style={styles.alertTime}>{alert.time}</Text>
-          </View>
-        ))}
+        {alerts.length === 0 ? (
+          <Text style={styles.alertEmpty}>Nenhum lembrete no momento.</Text>
+        ) : (
+          alerts.map((alert, index) => (
+            <View
+              key={index}
+              style={[styles.alertRow, index < alerts.length - 1 && styles.alertRowBorder]}
+            >
+              <Text style={styles.alertMessage}>{alert.message}</Text>
+              <Text style={styles.alertTime}>{alert.time}</Text>
+            </View>
+          ))
+        )}
       </Card>
 
       <View style={styles.grid}>
@@ -162,6 +213,11 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     fontWeight: '600',
     color: colors.green800,
+  },
+  alertEmpty: {
+    fontSize: fontSize.xs,
+    color: colors.gray500,
+    paddingVertical: 8,
   },
   alertRow: {
     flexDirection: 'row',

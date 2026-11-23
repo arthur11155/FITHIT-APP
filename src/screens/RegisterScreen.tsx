@@ -11,6 +11,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { colors, fontSize, radii } from '../theme';
 import Button from '../components/Button';
+import { writeJSON, STORAGE_KEYS } from '../storage/localStorage';
+import type { User } from '../data/types';
 
 interface Props {
   onBack: () => void;
@@ -95,6 +97,11 @@ export default function RegisterScreen({ onBack, onSuccess }: Props) {
     try {
       const result = await registerUser(formData);
       if (result.success) {
+        const user: User = {
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+        };
+        writeJSON(STORAGE_KEYS.user, user);
         onSuccess();
       } else {
         setErrors({ email: result.error || 'Erro ao criar conta' });

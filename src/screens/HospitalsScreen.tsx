@@ -6,12 +6,13 @@ import Button from '../components/Button';
 import Badge from '../components/Badge';
 import ScreenHeader from '../components/ScreenHeader';
 import { colors, fontSize, radii } from '../theme';
-import { seedHospitals } from '../data/seedData';
+import { defaultHospitals } from '../data/defaults';
+import type { Hospital } from '../data/types';
 import { useStoredState } from '../hooks/useStoredState';
 import { STORAGE_KEYS } from '../storage/localStorage';
 
 export default function HospitalsScreen() {
-  const [hospitals] = useStoredState(STORAGE_KEYS.hospitals, seedHospitals);
+  const [hospitals] = useStoredState<Hospital[]>(STORAGE_KEYS.hospitals, defaultHospitals);
   const openDirections = () => {
     Linking.openURL(
       'https://www.google.com/maps/search/?api=1&query=Av.+Boa+Viagem+100,+Recife,+PE'

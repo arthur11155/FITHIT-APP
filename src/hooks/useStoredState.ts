@@ -1,8 +1,15 @@
 import { useState } from 'react';
 import { readJSON, writeJSON } from '../storage/localStorage';
 
-export function useStoredState<T>(key: string, seed: T) {
-  const [value, setValue] = useState<T>(() => readJSON(key, seed));
+export function useStoredState<T>(key: string, initialValue: T) {
+  const [value, setValue] = useState<T>(() => {
+    const stored = readJSON<T | null>(key, null);
+    if (stored === null) {
+      writeJSON(key, initialValue);
+      return initialValue;
+    }
+    return stored;
+  });
 
   const update = (next: T | ((prev: T) => T)) => {
     setValue((prev) => {
